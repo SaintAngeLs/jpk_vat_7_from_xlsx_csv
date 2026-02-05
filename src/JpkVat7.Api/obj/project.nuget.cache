@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "EnJp0kbAIsQ=",
+  "success": true,
+  "projectFilePath": "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Api/JpkVat7.Api.csproj",
+  "expectedPackageFiles": [
+    "/home/kaliuser/.nuget/packages/microsoft.aspnetcore.openapi/9.0.1/microsoft.aspnetcore.openapi.9.0.1.nupkg.sha512",
+    "/home/kaliuser/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

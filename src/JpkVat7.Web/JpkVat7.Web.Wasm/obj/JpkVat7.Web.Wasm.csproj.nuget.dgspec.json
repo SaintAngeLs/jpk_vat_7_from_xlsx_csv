@@ -1,0 +1,102 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Web/JpkVat7.Web.Wasm/JpkVat7.Web.Wasm.csproj": {}
+  },
+  "projects": {
+    "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Web/JpkVat7.Web.Wasm/JpkVat7.Web.Wasm.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Web/JpkVat7.Web.Wasm/JpkVat7.Web.Wasm.csproj",
+        "projectName": "JpkVat7.Web.Wasm",
+        "projectPath": "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Web/JpkVat7.Web.Wasm/JpkVat7.Web.Wasm.csproj",
+        "packagesPath": "/home/kaliuser/.nuget/packages/",
+        "outputPath": "/home/kaliuser/Documents/itsharppro/lms/jpk_vat_7_from_xlsx_csv/src/JpkVat7.Web/JpkVat7.Web.Wasm/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/kaliuser/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Components.WebAssembly": {
+              "target": "Package",
+              "version": "[9.0.1, )"
+            },
+            "Microsoft.AspNetCore.Components.WebAssembly.DevServer": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.1, )"
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.1, )",
+              "autoReferenced": true
+            },
+            "Microsoft.NET.Sdk.WebAssembly.Pack": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.4, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[9.0.4, 9.0.4]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "browser-wasm": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
