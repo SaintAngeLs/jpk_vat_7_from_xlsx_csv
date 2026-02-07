@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JpkVat7.Core\JpkVat7.Core.csproj" />
+    <ProjectReference Include="..\JpkVat7.Input\JpkVat7.Input.csproj" />
+    <ProjectReference Include="..\JpkVat7.Xml\JpkVat7.Xml.csproj" />
   </ItemGroup>
 
 </Project>

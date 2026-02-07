@@ -1,3 +1,3 @@
-namespace JpkVat7.Core.Abstractions;
+namespace JpkVat7.Core.Abstractions.Result;
 
-public sealed record Error (string Code, string Message)
+public sealed record Error(string Code, string Message);

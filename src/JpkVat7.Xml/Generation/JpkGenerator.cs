@@ -1,8 +1,9 @@
 using JpkVat7.Core.Abstractions.Result;
 using JpkVat7.Core.Domain;
+using JpkVat7.Core.Services.Generation;
 using JpkVat7.Xml.Abstractions;
 
-namespace JpkVat7.Core.Services.Generation;
+namespace JpkVat7.Xml.Generation;
 
 public sealed class JpkGenerator : IJpkGenerator
 {

@@ -1,19 +1,21 @@
-namespace JpkVat7.Core.Abstractions;
+namespace JpkVat7.Core.Abstractions.Result;
 
-public sealed class  Result<T>
+public sealed class Result
 {
     public bool IsSuccess { get; }
-    public T? Value { get; }
-    public IReadOnlyList<Error> Errors { get; }
+    public Error? Error { get; }
 
-    private Result(bool ok, T? value, IReadOnlyList<Error> errors)
+    private Result(bool isSuccess, Error? error)
     {
-        IsSuccess = ok;
-        Value = value;
-        Errors = errors;
+        IsSuccess = isSuccess;
+        Error = error;
     }
 
-    public static Result<T> ok (T value) => new(true, value, Array.Empty<Error>());
-    
-    oubl
+    public static Result Ok() => new(true, null);
+
+    public static Result Fail(Error error) => new(false, error);
+
+    public static Result<T> Ok<T>(T value) => Result<T>.Ok(value);
+
+    public static Result<T> Fail<T>(Error error) => Result<T>.Fail(error);
 }

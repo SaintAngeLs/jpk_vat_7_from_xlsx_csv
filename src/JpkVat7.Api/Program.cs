@@ -10,6 +10,8 @@ using JpkVat7.Input.Xlsx;
 using JpkVat7.Xml.Abstractions;
 using JpkVat7.Xml.Validation;
 using JpkVat7.Xml.Writing;
+using JpkVat7.Xml.Generation;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
