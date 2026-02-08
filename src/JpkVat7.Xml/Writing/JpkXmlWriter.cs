@@ -29,95 +29,30 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
         {
             bundle.Podmiot.ValidateOrThrow();
 
-            // IMPORTANT: write via StringWriter so XmlWriter has a real TextWriter target
-            using var sw = new StringWriter(CultureInfo.InvariantCulture);
+            var encoding = Encoding.GetEncoding(_opt.EncodingName);
 
-            var settings = new XmlWriterSettings
+            using var ms = new MemoryStream();
+            using (var tw = new StreamWriter(ms, encoding, bufferSize: 16 * 1024, leaveOpen: true))
             {
-                Indent = true,
-                Encoding = Encoding.GetEncoding(_opt.EncodingName), // informational when writing to TextWriter
-                OmitXmlDeclaration = false
-            };
-
-            using (var xw = XmlWriter.Create(sw, settings))
-            {
-                xw.WriteStartDocument();
-
-                xw.WriteStartElement("tns", "JPK", JpkNamespaces.Tns);
-                xw.WriteAttributeString("xmlns", "etd", null, JpkNamespaces.Etd);
-                xw.WriteAttributeString("xmlns", "tns", null, JpkNamespaces.Tns);
-                xw.WriteAttributeString("xmlns", "xsi", null, JpkNamespaces.Xsi);
-
-                WriteRecordWrapped(xw, "Naglowek", bundle.Naglowek);
-
-                xw.WriteStartElement("tns", "Podmiot1", JpkNamespaces.Tns);
-                xw.WriteAttributeString("rola", "Podatnik");
-
-                if (bundle.Podmiot.IsOsobaFizyczna())
+                var settings = new XmlWriterSettings
                 {
-                    xw.WriteStartElement("tns", "OsobaFizyczna", JpkNamespaces.Tns);
-                    WriteRecordElements(xw, bundle.Podmiot.Fizyczna!);
-                    xw.WriteEndElement();
-                }
-                else
+                    Indent = true,
+                    Encoding = encoding,
+                    OmitXmlDeclaration = false,
+                    CloseOutput = false
+                };
+
+                using (var xw = XmlWriter.Create(tw, settings))
                 {
-                    xw.WriteStartElement("tns", "OsobaNiefizyczna", JpkNamespaces.Tns);
-                    WriteRecordElements(xw, bundle.Podmiot.Niefizyczna!);
-                    xw.WriteEndElement();
+                    WriteJpkDocument(xw, bundle);
+                    xw.Flush();
                 }
 
-                xw.WriteEndElement(); // Podmiot1
-
-                xw.WriteStartElement("tns", "Deklaracja", JpkNamespaces.Tns);
-
-                xw.WriteStartElement("tns", "Naglowek", JpkNamespaces.Tns);
-                WriteRecordElements(xw, bundle.DeklaracjaNaglowek);
-                xw.WriteEndElement();
-
-                xw.WriteStartElement("tns", "PozycjeSzczegolowe", JpkNamespaces.Tns);
-                WriteRecordElements(xw, bundle.DeklaracjaPozSzcz);
-                xw.WriteEndElement();
-
-                WriteRecordElements(xw, bundle.DeklaracjaPouczenia);
-
-                xw.WriteEndElement(); // Deklaracja
-
-                xw.WriteStartElement("tns", "Ewidencja", JpkNamespaces.Tns);
-
-                foreach (var w in bundle.SprzedazWiersze)
-                {
-                    xw.WriteStartElement("tns", "SprzedazWiersz", JpkNamespaces.Tns);
-                    WriteRecordElements(xw, w);
-                    xw.WriteEndElement();
-                }
-
-                xw.WriteStartElement("tns", "SprzedazCtrl", JpkNamespaces.Tns);
-                WriteRecordElements(xw, bundle.SprzedazCtrl);
-                xw.WriteEndElement();
-
-                foreach (var w in bundle.ZakupWiersze)
-                {
-                    xw.WriteStartElement("tns", "ZakupWiersz", JpkNamespaces.Tns);
-                    WriteRecordElements(xw, w);
-                    xw.WriteEndElement();
-                }
-
-                xw.WriteStartElement("tns", "ZakupCtrl", JpkNamespaces.Tns);
-                WriteRecordElements(xw, bundle.ZakupCtrl);
-                xw.WriteEndElement();
-
-                xw.WriteEndElement(); // Ewidencja
-
-                xw.WriteEndElement(); // JPK
-                xw.WriteEndDocument();
-
-                // ✅ make sure everything is written to the StringWriter
-                xw.Flush();
+                tw.Flush();
             }
 
-            var xml = sw.ToString();
+            var xml = encoding.GetString(ms.ToArray());
 
-            // ✅ fail fast if somehow empty
             if (string.IsNullOrWhiteSpace(xml))
                 return Result.Fail<string>(new Error("xml.empty", "Generated XML is empty."));
 
@@ -129,26 +64,109 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
         }
     }
 
-
-    /// <summary>
-    /// Writes: <tns:{wrapperName}> (properties...) </tns:{wrapperName}>
-    /// </summary>
-    private static void WriteRecordWrapped(XmlWriter xw, string wrapperName, object record)
+    private static void WriteJpkDocument(XmlWriter xw, JpkInputBundle bundle)
     {
-        xw.WriteStartElement("tns", wrapperName, JpkNamespaces.Tns);
-        WriteRecordElements(xw, record);
+        var nsJpk = JpkNamespaces.Tns; // this should be your JPK targetNamespace URI
+        var nsEtd = JpkNamespaces.Etd;
+        var nsXsi = JpkNamespaces.Xsi;
+
+        xw.WriteStartDocument();
+
+        // Root uses DEFAULT namespace (no prefix) => <JPK xmlns="...">
+        xw.WriteStartElement("JPK", nsJpk);
+
+        // default namespace declaration
+        xw.WriteAttributeString("xmlns", null, null, nsJpk);
+
+        // other namespace prefixes
+        xw.WriteAttributeString("xmlns", "etd", null, nsEtd);
+        xw.WriteAttributeString("xmlns", "xsi", null, nsXsi);
+
+        // --- Naglowek ---
+        WriteRecordWrappedDefaultNs(xw, "Naglowek", bundle.Naglowek, nsJpk);
+
+        // --- Podmiot1 ---
+        xw.WriteStartElement("Podmiot1", nsJpk);
+        xw.WriteAttributeString("rola", "Podatnik");
+
+        if (bundle.Podmiot.IsOsobaFizyczna())
+        {
+            xw.WriteStartElement("OsobaFizyczna", nsJpk);
+            WriteRecordElementsSmartNs(xw, bundle.Podmiot.Fizyczna!, nsJpk, nsEtd);
+            xw.WriteEndElement(); // OsobaFizyczna
+        }
+        else
+        {
+            xw.WriteStartElement("OsobaNiefizyczna", nsJpk);
+            WriteRecordElementsSmartNs(xw, bundle.Podmiot.Niefizyczna!, nsJpk, nsEtd);
+            xw.WriteEndElement(); // OsobaNiefizyczna
+        }
+
+        xw.WriteEndElement(); // Podmiot1
+
+        // --- Deklaracja ---
+        xw.WriteStartElement("Deklaracja", nsJpk);
+
+        xw.WriteStartElement("Naglowek", nsJpk);
+        WriteRecordElementsSmartNs(xw, bundle.DeklaracjaNaglowek, nsJpk, nsEtd);
+        xw.WriteEndElement();
+
+        xw.WriteStartElement("PozycjeSzczegolowe", nsJpk);
+        WriteRecordElementsSmartNs(xw, bundle.DeklaracjaPozSzcz, nsJpk, nsEtd);
+        xw.WriteEndElement();
+
+        // Pouczenia is a plain element in JPK namespace
+        WriteRecordElementsSmartNs(xw, bundle.DeklaracjaPouczenia, nsJpk, nsEtd);
+
+        xw.WriteEndElement(); // Deklaracja
+
+        // --- Ewidencja ---
+        xw.WriteStartElement("Ewidencja", nsJpk);
+
+        foreach (var w in bundle.SprzedazWiersze)
+        {
+            xw.WriteStartElement("SprzedazWiersz", nsJpk);
+            WriteRecordElementsSmartNs(xw, w, nsJpk, nsEtd);
+            xw.WriteEndElement();
+        }
+
+        xw.WriteStartElement("SprzedazCtrl", nsJpk);
+        WriteRecordElementsSmartNs(xw, bundle.SprzedazCtrl, nsJpk, nsEtd);
+        xw.WriteEndElement();
+
+        foreach (var w in bundle.ZakupWiersze)
+        {
+            xw.WriteStartElement("ZakupWiersz", nsJpk);
+            WriteRecordElementsSmartNs(xw, w, nsJpk, nsEtd);
+            xw.WriteEndElement();
+        }
+
+        xw.WriteStartElement("ZakupCtrl", nsJpk);
+        WriteRecordElementsSmartNs(xw, bundle.ZakupCtrl, nsJpk, nsEtd);
+        xw.WriteEndElement();
+
+        xw.WriteEndElement(); // Ewidencja
+
+        xw.WriteEndElement(); // JPK
+        xw.WriteEndDocument();
+    }
+
+    private static void WriteRecordWrappedDefaultNs(XmlWriter xw, string wrapperName, object record, string nsJpk)
+    {
+        xw.WriteStartElement(wrapperName, nsJpk);
+        WriteRecordElementsSmartNs(xw, record, nsJpk, JpkNamespaces.Etd);
         xw.WriteEndElement();
     }
 
     /// <summary>
-    /// Writes each property of a record as a child element.
-    /// Skips null / empty string.
+    /// Writes each property as an element, choosing namespace:
+    /// - default JPK namespace for most fields (no prefix)
+    /// - etd namespace for specific identity fields (etd:NIP etc.) to match common JPKs
     ///
-    /// IMPORTANT:
-    /// JPK XSD often uses "sequence" so order matters.
-    /// If you need strict order, see the note below to add an explicit order list.
+    /// NOTE: This does NOT handle attributes like KodFormularza.kodSystemowy yet.
+    /// You must add explicit writing for those nodes.
     /// </summary>
-    private static void WriteRecordElements(XmlWriter xw, object record)
+    private static void WriteRecordElementsSmartNs(XmlWriter xw, object record, string nsJpk, string nsEtd)
     {
         var props = record.GetType()
             .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -158,14 +176,12 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
         foreach (var p in props)
         {
             var value = p.GetValue(record);
-
             if (value is null) continue;
 
-            // Convert to string
             string text = value switch
             {
                 string s => s.Trim(),
-                bool b => b ? "1" : "0", // often used in JPK-like formats; adjust if needed
+                bool b => b ? "1" : "0",
                 DateTime dt => dt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 DateTimeOffset dto => dto.ToString("O", CultureInfo.InvariantCulture),
                 IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
@@ -174,8 +190,21 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
 
             if (string.IsNullOrWhiteSpace(text)) continue;
 
-            // Default namespace is tns (matches your Go’s “99% is tns”)
-            xw.WriteStartElement("tns", p.Name, JpkNamespaces.Tns);
+            // Choose namespace:
+            // In many JPK examples, identity fields under OsobaFizyczna are in etd namespace.
+            // Add more as needed.
+            var name = p.Name;
+            var useEtd = name is "NIP" or "ImiePierwsze" or "Nazwisko" or "DataUrodzenia";
+
+            if (useEtd)
+            {
+                xw.WriteStartElement("etd", name, nsEtd); // => <etd:NIP>...
+            }
+            else
+            {
+                xw.WriteStartElement(name, nsJpk);        // => <NazwaSystemu>... in default ns
+            }
+
             xw.WriteString(text);
             xw.WriteEndElement();
         }
