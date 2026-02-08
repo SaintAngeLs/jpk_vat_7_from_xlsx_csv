@@ -6,4 +6,7 @@ public sealed class JpkSchemaOptions
     public string NamespaceUri { get; init; } = "http://jpk.mf.gov.pl/wzor/2020/05/08/9393/";
     public string EncodingName { get; init; } = "utf-8";
     public string? XsdPath { get; init; }
+
+    public bool IncludeGeneratedAt { get; init; } = true;
+    public string GeneratedAtElementName { get; init; } = "GeneratedAtUtc";
 }

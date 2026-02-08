@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package jpkvat7.v1;
+
+option csharp_namespace = "JpkVat7.Grpc";
+
+service JpkService {
+  // Client-streaming upload. Server returns XML (or XML + error).
+  rpc GenerateFromFile (stream UploadChunk) returns (GenerateReply);
+}
+
+message UploadChunk {
+  // Sent only in the first message (recommended).
+  string file_name = 1;
+
+  // File bytes (set for every chunk).
+  bytes data = 2;
+}
+
+message GenerateReply {
+  bool success = 1;
+
+  // XML if success == true, or optional even on failure for debugging.
+  string xml = 2;
+
+  // Error info if success == false.
+  string error_code = 3;
+  string error_message = 4;
+
+  // Validation error details (optional)
+  string validation_message = 5;
+}

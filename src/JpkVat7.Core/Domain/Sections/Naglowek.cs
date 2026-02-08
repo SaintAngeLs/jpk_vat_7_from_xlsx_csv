@@ -1,11 +1,18 @@
 namespace JpkVat7.Core.Domain.Sections;
 
-public sealed record Naglowek(IReadOnlyDictionary<string, string> Fields);
+public sealed record Naglowek
+{
+    public string KodFormularza { get; init; } = "";
+    public string WariantFormularza { get; init; } = "";
 
-public sealed record Podmiot(IReadOnlyDictionary<string, string> Fields);
+    // Common in JPK headers:
+    public string CelZlozenia { get; init; } = "";
+    public int Rok { get; init; }
+    public int Miesiac { get; init; }
 
-public sealed record Deklaracja(IReadOnlyDictionary<string, string> Fields);
+    public string KodUrzedu { get; init; } = "";
+    public DateTime DataWytworzeniaJpk { get; init; } = DateTime.UtcNow;
 
-public sealed record SprzedazWiersz(IReadOnlyDictionary<string, string> Fields);
-
-public sealed record ZakupWiersz(IReadOnlyDictionary<string, string> Fields);
+    // Optional technical fields:
+    public string NazwaSystemu { get; init; } = "";
+}

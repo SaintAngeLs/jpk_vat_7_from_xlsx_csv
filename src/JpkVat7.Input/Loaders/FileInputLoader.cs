@@ -43,11 +43,11 @@ public sealed class FileInputLoader : IInputLoader
 
         var table = tRes.Value;
 
-        // Detect mode
         if (table.Rows.Count == 0)
             return Result.Fail<JpkInputBundle>(new Error("input.empty", "Input file is empty"));
 
         ParsedSections parsed;
+
         if (_detector.LooksLikeSectionedFile(table.Rows))
         {
             var p = _sectioned.Parse(table);

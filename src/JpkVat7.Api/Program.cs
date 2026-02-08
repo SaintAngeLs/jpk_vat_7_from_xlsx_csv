@@ -1,4 +1,7 @@
-using JpkVat7.Api.Endpoints;
+using Grpc.AspNetCore.Web;
+using JpkVat7.Api.Grpc;
+using JpkVat7.Core.Abstractions;
+using JpkVat7.Core.Abstractions.DateTime;
 using JpkVat7.Core.Options;
 using JpkVat7.Core.Services.Generation;
 using JpkVat7.Core.Services.Mapping;
@@ -8,19 +11,23 @@ using JpkVat7.Input.Loaders;
 using JpkVat7.Input.Parsing;
 using JpkVat7.Input.Xlsx;
 using JpkVat7.Xml.Abstractions;
+using JpkVat7.Xml.Generation;
 using JpkVat7.Xml.Validation;
 using JpkVat7.Xml.Writing;
-using JpkVat7.Xml.Generation;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Options
 builder.Services.Configure<JpkSchemaOptions>(builder.Configuration.GetSection("JpkSchema"));
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// CORS (dev)
+builder.Services.AddCors();
+
+// gRPC
+builder.Services.AddGrpc();
 
 // Core services
+builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<ISectionMapper, DefaultSectionMapper>();
 builder.Services.AddSingleton<IJpkGenerator, JpkGenerator>();
 
@@ -32,74 +39,39 @@ builder.Services.AddSingleton<IEnumerable<IWorkbookReader>>(sp => new IWorkbookR
     sp.GetRequiredService<CsvWorkbookReader>(),
     sp.GetRequiredService<XlsxWorkbookReader>()
 });
-
 builder.Services.AddSingleton<IInputDetector, InputDetector>();
 builder.Services.AddSingleton<SectionedFileParser>();
 builder.Services.AddSingleton<SingleHeaderFileParser>();
 
-// Two loaders:
+// Loaders
 builder.Services.AddSingleton<DirectoryInputLoader>();
 builder.Services.AddSingleton<FileInputLoader>();
 
-// Expose as Core IInputLoader via named registration in endpoints:
-// (we’ll register them separately to avoid ambiguity)
+// XML
 builder.Services.AddSingleton<IJpkXmlWriter, JpkXmlWriter>();
 builder.Services.AddSingleton<IJpkXmlValidator, JpkXsdValidator>();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// If you want to redirect HTTP -> HTTPS once cert is trusted, enable this.
+// app.UseHttpsRedirection();
 
 app.MapGet("/health", () => Results.Ok("OK"));
 
-// Map endpoints using the correct loader per route
-app.MapPost("/api/jpk/generate/file", async (
-    IFormFile file,
-    FileInputLoader loader,
-    IJpkGenerator generator,
-    IJpkXmlValidator validator,
-    CancellationToken ct) =>
-{
-    if (file.Length == 0) return Results.BadRequest("Empty file.");
+// Dev CORS: allow browser gRPC-Web
+app.UseCors(policy =>
+    policy
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding")
+);
 
-    var ext = Path.GetExtension(file.FileName);
-    var tmp = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}{ext}");
+// gRPC-Web middleware
+app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
-    await using (var fs = File.Create(tmp))
-        await file.CopyToAsync(fs, ct);
-
-    var bundleRes = await loader.LoadAsync(tmp, ct);
-    File.Delete(tmp);
-
-    if (!bundleRes.IsSuccess) return Results.BadRequest(bundleRes.Error);
-
-    var xmlRes = generator.GenerateXml(bundleRes.Value);
-    if (!xmlRes.IsSuccess) return Results.Problem(xmlRes.Error.Message);
-
-    var valRes = validator.Validate(xmlRes.Value);
-    if (!valRes.IsSuccess) return Results.BadRequest(new { error = valRes.Error, xml = xmlRes.Value });
-
-    return Results.Text(xmlRes.Value, "application/xml");
-});
-
-app.MapPost("/api/jpk/generate/directory", async (
-    string path,
-    DirectoryInputLoader loader,
-    IJpkGenerator generator,
-    IJpkXmlValidator validator,
-    CancellationToken ct) =>
-{
-    var bundleRes = await loader.LoadAsync(path, ct);
-    if (!bundleRes.IsSuccess) return Results.BadRequest(bundleRes.Error);
-
-    var xmlRes = generator.GenerateXml(bundleRes.Value);
-    if (!xmlRes.IsSuccess) return Results.Problem(xmlRes.Error.Message);
-
-    var valRes = validator.Validate(xmlRes.Value);
-    if (!valRes.IsSuccess) return Results.BadRequest(new { error = valRes.Error, xml = xmlRes.Value });
-
-    return Results.Text(xmlRes.Value, "application/xml");
-});
+// gRPC endpoint
+app.MapGrpcService<JpkGrpcService>()
+   .EnableGrpcWeb();
 
 app.Run();
