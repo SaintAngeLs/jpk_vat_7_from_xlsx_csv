@@ -10,6 +10,11 @@
     <Protobuf Include="Protos\jpk.proto" GrpcServices="Client" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+  </PropertyGroup>
+
+
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.2" />

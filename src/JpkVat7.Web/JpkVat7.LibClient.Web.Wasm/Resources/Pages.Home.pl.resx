@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Title" xml:space="preserve">
+    <value>Konwerter JPK XML</value>
+  </data>
+  <data name="Subtitle" xml:space="preserve">
+    <value>Wgraj plik &lt;b&gt;CSV&lt;/b&gt; lub &lt;b&gt;XLSX&lt;/b&gt;, skonwertuj go na serwerze przez &lt;b&gt;gRPC-Web&lt;/b&gt;, a następnie pobierz wynikowy &lt;b&gt;XML&lt;/b&gt;.</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Konwersja odbywa się na serwerze, więc przeglądarka pozostaje responsywna. Duże pliki mogą zająć chwilę.</value>
+  </data>
+
+  <data name="Step1" xml:space="preserve">
+    <value>1) Wybierz format</value>
+  </data>
+  <data name="InputFormat" xml:space="preserve">
+    <value>Format wejściowy</value>
+  </data>
+  <data name="AutoDetect" xml:space="preserve">
+    <value>Automatycznie (CSV / XLSX)</value>
+  </data>
+  <data name="Csv" xml:space="preserve">
+    <value>CSV</value>
+  </data>
+  <data name="Xlsx" xml:space="preserve">
+    <value>XLSX</value>
+  </data>
+
+  <data name="Step2" xml:space="preserve">
+    <value>2) Wgraj plik</value>
+  </data>
+  <data name="DropTitle" xml:space="preserve">
+    <value>Przeciągnij i upuść plik tutaj</value>
+  </data>
+  <data name="DropOr" xml:space="preserve">
+    <value>lub kliknij, aby wybrać</value>
+  </data>
+  <data name="Allowed" xml:space="preserve">
+    <value>Dozwolone</value>
+  </data>
+  <data name="RemoveFile" xml:space="preserve">
+    <value>Usuń wybrany plik</value>
+  </data>
+
+  <data name="Step3" xml:space="preserve">
+    <value>3) Konwertuj</value>
+  </data>
+  <data name="Convert" xml:space="preserve">
+    <value>Konwertuj do XML</value>
+  </data>
+  <data name="Converting" xml:space="preserve">
+    <value>Konwertowanie…</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Pobierz XML</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Resetuj</value>
+  </data>
+  <data name="KeepOpen" xml:space="preserve">
+    <value>Pozostaw tę kartę otwartą podczas przetwarzania na serwerze.</value>
+  </data>
+
+  <data name="Step4" xml:space="preserve">
+    <value>4) Podgląd XML</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiuj XML do schowka</value>
+  </data>
+  <data name="ClearPreview" xml:space="preserve">
+    <value>Wyczyść podgląd</value>
+  </data>
+  <data name="PreviewHint" xml:space="preserve">
+    <value>To jest podgląd tylko do odczytu. Użyj „Pobierz XML”, aby zapisać plik.</value>
+  </data>
+  <data name="NoXml" xml:space="preserve">
+    <value>Brak XML. Wgraj plik i kliknij „Konwertuj do XML”.</value>
+  </data>
+
+  <data name="BusyTitle" xml:space="preserve">
+    <value>Konwersja na serwerze…</value>
+  </data>
+  <data name="BusyHint" xml:space="preserve">
+    <value>Dla dużych plików lub złożonych arkuszy może to potrwać dłużej.</value>
+  </data>
+
+  <data name="StatusFileSelected" xml:space="preserve">
+    <value>Plik wybrany. Gotowe do konwersji.</value>
+  </data>
+  <data name="StatusFileMismatch" xml:space="preserve">
+    <value>Plik wybrany, ale nie pasuje do filtra. Zmień filtr lub wybierz inny plik.</value>
+  </data>
+  <data name="StatusDrop" xml:space="preserve">
+    <value>Wykryto upuszczenie. Kliknij obszar, aby wybrać plik (ograniczenie przeglądarki).</value>
+  </data>
+  <data name="StatusStarting" xml:space="preserve">
+    <value>Rozpoczynam konwersję…</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Gotowe. XML został wygenerowany.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Niepowodzenie.</value>
+  </data>
+  <data name="StatusFailedTimeout" xml:space="preserve">
+    <value>Niepowodzenie (timeout).</value>
+  </data>
+  <data name="StatusFailedException" xml:space="preserve">
+    <value>Niepowodzenie (wyjątek).</value>
+  </data>
+
+  <data name="ErrorTimeout" xml:space="preserve">
+    <value>Przekroczono limit czasu lub anulowano (120s).</value>
+  </data>
+  <data name="ErrorConversionFailed" xml:space="preserve">
+    <value>Konwersja nie powiodła się.</value>
+  </data>
+
+  <data name="TooltipCopy" xml:space="preserve">
+    <value>Kopiuj XML do schowka</value>
+  </data>
+  <data name="TooltipClear" xml:space="preserve">
+    <value>Wyczyść podgląd</value>
+  </data>
+</root>

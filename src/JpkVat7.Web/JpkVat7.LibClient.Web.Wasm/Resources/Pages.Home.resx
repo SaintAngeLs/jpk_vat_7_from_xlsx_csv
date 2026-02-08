@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Title" xml:space="preserve">
+    <value>JPK XML Converter</value>
+  </data>
+  <data name="Subtitle" xml:space="preserve">
+    <value>Upload a &lt;b&gt;CSV&lt;/b&gt; or &lt;b&gt;XLSX&lt;/b&gt; file, convert it on the server via &lt;b&gt;gRPC-Web&lt;/b&gt;, then download the resulting &lt;b&gt;XML&lt;/b&gt;.</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Conversion happens on the server, so your browser stays responsive. Large files may take a moment.</value>
+  </data>
+
+  <data name="Step1" xml:space="preserve">
+    <value>1) Select input</value>
+  </data>
+  <data name="InputFormat" xml:space="preserve">
+    <value>Input format</value>
+  </data>
+  <data name="AutoDetect" xml:space="preserve">
+    <value>Auto-detect (CSV / XLSX)</value>
+  </data>
+  <data name="Csv" xml:space="preserve">
+    <value>CSV</value>
+  </data>
+  <data name="Xlsx" xml:space="preserve">
+    <value>XLSX</value>
+  </data>
+
+  <data name="Step2" xml:space="preserve">
+    <value>2) Upload file</value>
+  </data>
+  <data name="DropTitle" xml:space="preserve">
+    <value>Drag &amp; drop your file here</value>
+  </data>
+  <data name="DropOr" xml:space="preserve">
+    <value>or click to browse</value>
+  </data>
+  <data name="Allowed" xml:space="preserve">
+    <value>Allowed</value>
+  </data>
+  <data name="RemoveFile" xml:space="preserve">
+    <value>Remove selected file</value>
+  </data>
+
+  <data name="Step3" xml:space="preserve">
+    <value>3) Convert</value>
+  </data>
+  <data name="Convert" xml:space="preserve">
+    <value>Convert to XML</value>
+  </data>
+  <data name="Converting" xml:space="preserve">
+    <value>Converting…</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download XML</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="KeepOpen" xml:space="preserve">
+    <value>Please keep this tab open while the server processes the file.</value>
+  </data>
+
+  <data name="Step4" xml:space="preserve">
+    <value>4) XML Preview</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy XML to clipboard</value>
+  </data>
+  <data name="ClearPreview" xml:space="preserve">
+    <value>Clear preview</value>
+  </data>
+  <data name="PreviewHint" xml:space="preserve">
+    <value>This is a read-only preview. Use “Download XML” to save the file.</value>
+  </data>
+  <data name="NoXml" xml:space="preserve">
+    <value>No XML yet. Upload a file and click “Convert to XML”.</value>
+  </data>
+
+  <data name="BusyTitle" xml:space="preserve">
+    <value>Converting on server…</value>
+  </data>
+  <data name="BusyHint" xml:space="preserve">
+    <value>This can take longer for large files or complex spreadsheets.</value>
+  </data>
+
+  <data name="StatusFileSelected" xml:space="preserve">
+    <value>File selected. Ready to convert.</value>
+  </data>
+  <data name="StatusFileMismatch" xml:space="preserve">
+    <value>File selected, but it doesn’t match the current filter. Change the filter or select another file.</value>
+  </data>
+  <data name="StatusDrop" xml:space="preserve">
+    <value>Drop detected. Please click the area to choose the file (browser security restriction).</value>
+  </data>
+  <data name="StatusStarting" xml:space="preserve">
+    <value>Starting conversion…</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Done. XML generated successfully.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Failed.</value>
+  </data>
+  <data name="StatusFailedTimeout" xml:space="preserve">
+    <value>Failed (timeout).</value>
+  </data>
+  <data name="StatusFailedException" xml:space="preserve">
+    <value>Failed (exception).</value>
+  </data>
+
+  <data name="ErrorTimeout" xml:space="preserve">
+    <value>Timed out or cancelled (120s limit).</value>
+  </data>
+  <data name="ErrorConversionFailed" xml:space="preserve">
+    <value>Conversion failed.</value>
+  </data>
+
+  <data name="TooltipCopy" xml:space="preserve">
+    <value>Copy XML to clipboard</value>
+  </data>
+  <data name="TooltipClear" xml:space="preserve">
+    <value>Clear preview</value>
+  </data>
+</root>

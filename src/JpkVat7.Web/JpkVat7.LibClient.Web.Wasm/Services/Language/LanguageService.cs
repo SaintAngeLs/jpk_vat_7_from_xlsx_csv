@@ -27,10 +27,14 @@ public sealed class LanguageService : ILanguageService
     private async Task ApplyCultureAsync(string culture, bool persist, CancellationToken ct)
     {
         culture = culture is "pl" or "en" ? culture : "en";
-
         _current = culture;
 
         var ci = new CultureInfo(culture);
+
+        // IMPORTANT for WASM runtime changes
+        CultureInfo.CurrentCulture = ci;
+        CultureInfo.CurrentUICulture = ci;
+
         CultureInfo.DefaultThreadCurrentCulture = ci;
         CultureInfo.DefaultThreadCurrentUICulture = ci;
 
