@@ -19,10 +19,8 @@ builder.RootComponents.Add<App>("#app");
 // MudBlazor
 builder.Services.AddMudServices();
 
-// Localization resources path
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// Local storage + prefs + language
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ILocalStorageServiceWrapper, LocalStorageServiceWrapper>();
 builder.Services.AddScoped<IAppPreferencesService, AppPreferencesService>();
@@ -46,10 +44,8 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddSingleton<JpkGrpcUploadClient>();
 
-// ✅ Build host first
 var host = builder.Build();
 
-// ✅ Apply culture BEFORE first render
 var langService = host.Services.GetRequiredService<ILanguageService>();
 await langService.InitializeAsync();
 

@@ -231,14 +231,12 @@
 
     private void OnLanguageChanged()
     {
-        // Re-render this page + refresh TopBar title in current language
         SetTopBarTitle();
         InvokeAsync(StateHasChanged);
     }
 
     private void SetTopBarTitle()
     {
-        // Title will update when culture changes now
         TopBar.SetTitle(L["Title"].Value, "CSV/XLSX → XML (gRPC-Web)");
     }
 
