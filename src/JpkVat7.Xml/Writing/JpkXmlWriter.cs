@@ -66,26 +66,21 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
 
     private static void WriteJpkDocument(XmlWriter xw, JpkInputBundle bundle)
     {
-        var nsJpk = JpkNamespaces.Tns; // this should be your JPK targetNamespace URI
+        var nsJpk = JpkNamespaces.Tns;
         var nsEtd = JpkNamespaces.Etd;
         var nsXsi = JpkNamespaces.Xsi;
 
         xw.WriteStartDocument();
 
-        // Root uses DEFAULT namespace (no prefix) => <JPK xmlns="...">
         xw.WriteStartElement("JPK", nsJpk);
 
-        // default namespace declaration
         xw.WriteAttributeString("xmlns", null, null, nsJpk);
 
-        // other namespace prefixes
         xw.WriteAttributeString("xmlns", "etd", null, nsEtd);
         xw.WriteAttributeString("xmlns", "xsi", null, nsXsi);
 
-        // --- Naglowek ---
         WriteRecordWrappedDefaultNs(xw, "Naglowek", bundle.Naglowek, nsJpk);
 
-        // --- Podmiot1 ---
         xw.WriteStartElement("Podmiot1", nsJpk);
         xw.WriteAttributeString("rola", "Podatnik");
 
@@ -93,16 +88,16 @@ public sealed class JpkXmlWriter : IJpkXmlWriter
         {
             xw.WriteStartElement("OsobaFizyczna", nsJpk);
             WriteRecordElementsSmartNs(xw, bundle.Podmiot.Fizyczna!, nsJpk, nsEtd);
-            xw.WriteEndElement(); // OsobaFizyczna
+            xw.WriteEndElement(); 
         }
         else
         {
             xw.WriteStartElement("OsobaNiefizyczna", nsJpk);
             WriteRecordElementsSmartNs(xw, bundle.Podmiot.Niefizyczna!, nsJpk, nsEtd);
-            xw.WriteEndElement(); // OsobaNiefizyczna
+            xw.WriteEndElement(); 
         }
 
-        xw.WriteEndElement(); // Podmiot1
+        xw.WriteEndElement(); 
 
         // --- Deklaracja ---
         xw.WriteStartElement("Deklaracja", nsJpk);
