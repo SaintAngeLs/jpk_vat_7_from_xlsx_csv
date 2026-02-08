@@ -3,75 +3,216 @@
 @inject JpkVat7.LibClient.Web.Wasm.Services.JpkGrpcUploadClient GrpcClient
 @inject IJSRuntime JS
 
-<MudPaper Class="pa-4" Elevation="1" Rounded="Rounded.Lg">
-    <MudStack Spacing="2">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6 mb-10">
+    <MudPaper Class="pa-6 jpk-card" Elevation="2" Rounded="Rounded.Xl">
 
-        <MudText Typo="Typo.h5">Convert file to JPK XML</MudText>
+        <!-- Header -->
+        <MudStack Spacing="1">
+            <MudText Typo="Typo.h4" Class="fw-700">JPK XML Converter</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                Upload a <b>CSV</b> or <b>XLSX</b> file, convert it on the server via <b>gRPC-Web</b>, then download the resulting <b>XML</b>.
+            </MudText>
+        </MudStack>
 
-        <MudAlert Severity="Severity.Info" Dense="true">
-            Upload one <b>.csv</b> or <b>.xlsx</b>, then click Convert. Conversion is done on the server via gRPC-Web (no browser freeze).
+        <MudDivider Class="my-4" />
+
+        <!-- Info -->
+        <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Dense="true" Class="mb-4">
+            Conversion happens on the server, so your browser stays responsive. Large files may take a moment.
         </MudAlert>
 
         @if (!string.IsNullOrWhiteSpace(_status))
         {
-            <MudAlert Severity="Severity.Info" Dense="true">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-4">
                 @_status
             </MudAlert>
         }
 
-        <MudStack Direction="Row" Spacing="2" AlignItems="AlignItems.Center">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenFilePicker">
-                Choose CSV/XLSX
-            </MudButton>
-
-            <InputFile id="filePicker"
-                       OnChange="OnInputFileChanged"
-                       accept=".csv,.xlsx"
-                       style="display:none" />
-        </MudStack>
-
-        @if (_file is not null)
-        {
-            <MudText Typo="Typo.body2">
-                Selected: <b>@_file.Name</b> (@($"{_file.Size / 1024.0:F1} KB"))
-            </MudText>
-        }
-
-        <MudStack Direction="Row" Spacing="2" AlignItems="AlignItems.Center">
-            <MudButton Disabled="@(_file is null || _busy)"
-                       OnClick="ConvertAsync"
-                       Variant="Variant.Filled"
-                       Color="Color.Secondary">
-                @(_busy ? "Converting..." : "Convert to XML")
-            </MudButton>
-
-            <MudButton Disabled="@string.IsNullOrWhiteSpace(_xml)"
-                       OnClick="DownloadXmlAsync"
-                       Variant="Variant.Outlined">
-                Download XML
-            </MudButton>
-        </MudStack>
-
         @if (!string.IsNullOrWhiteSpace(_error))
         {
-            <MudAlert Severity="Severity.Error" Dense="true">
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4" Style="white-space:pre-wrap">
                 @_error
             </MudAlert>
         }
 
-        @if (!string.IsNullOrWhiteSpace(_xml))
-        {
-            <MudDivider Class="my-2" />
-            <MudText Typo="Typo.h6">XML Preview</MudText>
+        <!-- Main content -->
+        <MudGrid Spacing="3">
+            <!-- Left: Upload & Actions -->
+            <MudItem xs="12" md="5">
+                <MudPaper Class="pa-4" Elevation="0" Outlined="true" Rounded="Rounded.Lg">
 
-            <MudTextField Lines="18"
-                          ReadOnly="true"
-                          Variant="Variant.Outlined"
-                          Value="@_xml"
-                          FullWidth="true" />
-        }
-    </MudStack>
-</MudPaper>
+                    <MudText Typo="Typo.h6" Class="mb-2">1) Select input</MudText>
+
+                    <!-- Dropdown for file type -->
+                    <MudSelect T="InputKind"
+                               Dense="true"
+                               Variant="Variant.Outlined"
+                               Label="Input format"
+                               Value="_inputKind"
+                               ValueChanged="OnInputKindChanged"
+                               Class="mb-3">
+                        <MudSelectItem Value="InputKind.Auto">Auto-detect (CSV / XLSX)</MudSelectItem>
+                        <MudSelectItem Value="InputKind.Csv">CSV</MudSelectItem>
+                        <MudSelectItem Value="InputKind.Xlsx">XLSX</MudSelectItem>
+                    </MudSelect>
+
+                    <MudText Typo="Typo.h6" Class="mt-2 mb-2">2) Upload file</MudText>
+
+                    <!-- Drop zone -->
+                    <div class="dropzone @( _busy ? "dropzone-disabled" : "" )"
+                         @ondragenter="OnDragEnter"
+                         @ondragover="OnDragOver"
+                         @ondragover:preventDefault="true"
+                         @ondragleave="OnDragLeave"
+                         @ondrop="OnDrop"
+                         @ondrop:preventDefault="true"
+                         role="button"
+                         tabindex="0"
+                         aria-label="File drop area"
+                         @onclick="OpenFilePicker">
+                        <MudStack Spacing="1" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" />
+                            <MudText Typo="Typo.body1" Class="fw-600">
+                                Drag & drop your file here
+                            </MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                or click to browse
+                            </MudText>
+
+                            <!-- FIX 1: MudChip is generic in some MudBlazor versions -->
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small">
+                                Allowed: @_accept
+                            </MudChip>
+                        </MudStack>
+                    </div>
+
+                    <!-- Hidden picker -->
+                    <InputFile id="filePicker"
+                               OnChange="OnInputFileChanged"
+                               accept="@_accept"
+                               style="display:none" />
+
+                    @if (_file is not null)
+                    {
+                        <MudPaper Class="pa-3 mt-3" Outlined="true" Rounded="Rounded.Lg">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Description" />
+                                <MudStack Spacing="0" Class="flex-grow-1">
+                                    <MudText Typo="Typo.subtitle2" Class="fw-700">@_file.Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @($"{_file.Size / 1024.0:F1} KB")
+                                    </MudText>
+                                </MudStack>
+
+                                <MudTooltip Text="Remove selected file">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                   Color="Color.Default"
+                                                   OnClick="ClearFile"
+                                                   Disabled="@_busy" />
+                                </MudTooltip>
+                            </MudStack>
+                        </MudPaper>
+                    }
+
+                    <MudDivider Class="my-4" />
+
+                    <MudText Typo="Typo.h6" Class="mb-2">3) Convert</MudText>
+
+                    <MudStack Spacing="2">
+                        <MudButton StartIcon="@Icons.Material.Filled.Autorenew"
+                                   Disabled="@(!CanConvert)"
+                                   OnClick="ConvertAsync"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true">
+                            @(_busy ? "Converting…" : "Convert to XML")
+                        </MudButton>
+
+                        <MudButton StartIcon="@Icons.Material.Filled.Download"
+                                   Disabled="@(!CanDownload)"
+                                   OnClick="DownloadXmlAsync"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Secondary"
+                                   FullWidth="true">
+                            Download XML
+                        </MudButton>
+
+                        <MudButton StartIcon="@Icons.Material.Filled.Refresh"
+                                   Disabled="@_busy"
+                                   OnClick="ResetAll"
+                                   Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   FullWidth="true">
+                            Reset
+                        </MudButton>
+                    </MudStack>
+
+                    @if (_busy)
+                    {
+                        <MudProgressLinear Indeterminate="true" Class="mt-4" />
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                            Please keep this tab open while the server processes the file.
+                        </MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            <!-- Right: Preview -->
+            <MudItem xs="12" md="7">
+                <MudPaper Class="pa-4" Elevation="0" Outlined="true" Rounded="Rounded.Lg">
+                    <MudStack Direction="Row" AlignItems="AlignItems.Center" JustifyContent="SpaceBetween">
+                        <MudText Typo="Typo.h6">4) XML Preview</MudText>
+
+                        <MudStack Direction="Row" Spacing="1" AlignItems="AlignItems.Center">
+                            <MudTooltip Text="Copy XML to clipboard">
+                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                               Disabled="@(!CanCopy)"
+                                               OnClick="CopyXmlAsync" />
+                            </MudTooltip>
+                            <MudTooltip Text="Clear preview">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                               Disabled="@(!CanClearPreview)"
+                                               OnClick="ClearXml" />
+                            </MudTooltip>
+                        </MudStack>
+                    </MudStack>
+
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                        This is a read-only preview. Use “Download XML” to save the file.
+                    </MudText>
+
+                    <MudTextField Lines="20"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined"
+                                  Value="@_xml"
+                                  FullWidth="true"
+                                  Class="xml-preview" />
+
+                    @if (string.IsNullOrWhiteSpace(_xml))
+                    {
+                        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3">
+                            No XML yet. Upload a file and click “Convert to XML”.
+                        </MudAlert>
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Busy overlay -->
+        <MudOverlay Visible="_busy" DarkBackground="true" AutoClose="false">
+            <MudPaper Class="pa-6" Rounded="Rounded.Xl">
+                <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                    <MudText Typo="Typo.h6">Converting on server…</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                        This can take longer for large files or complex spreadsheets.
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        </MudOverlay>
+
+    </MudPaper>
+</MudContainer>
 
 @code {
     private IBrowserFile? _file;
@@ -79,6 +220,45 @@
     private string _xml = "";
     private string _error = "";
     private string _status = "";
+
+    private InputKind _inputKind = InputKind.Auto;
+    private string _accept = ".csv,.xlsx";
+    private bool _dragOver;
+
+    private enum InputKind { Auto, Csv, Xlsx }
+
+    // FIX 2: avoid complex expressions inside Disabled on some components / Razor analyzers
+    private bool CanConvert => _file is not null && !_busy;
+    private bool CanDownload => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+    private bool CanCopy => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+    private bool CanClearPreview => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+
+    private Task OnInputKindChanged(InputKind kind)
+    {
+        _inputKind = kind;
+        _accept = kind switch
+        {
+            InputKind.Csv => ".csv",
+            InputKind.Xlsx => ".xlsx",
+            _ => ".csv,.xlsx"
+        };
+
+        if (_file is not null && !IsFileAllowed(_file.Name, _accept))
+            _status = "Selected file does not match the chosen filter. You can still change the filter or select a different file.";
+
+        return Task.CompletedTask;
+    }
+
+    private static bool IsFileAllowed(string fileName, string accept)
+    {
+        var lower = fileName.ToLowerInvariant();
+        var allowed = accept.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var ext in allowed)
+            if (lower.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+        return false;
+    }
 
     private async Task SetStatusAsync(string text)
     {
@@ -95,13 +275,11 @@
         _error = "";
         _xml = "";
 
-        await SetStatusAsync("Starting...");
+        await SetStatusAsync("Starting conversion…");
 
         try
         {
-            // Longer than 20s because upload + server processing can take time
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
-
             var reply = await GrpcClient.UploadAndConvertAsync(_file, cts.Token, SetStatusAsync);
 
             if (!reply.Success)
@@ -118,11 +296,11 @@
             }
 
             _xml = reply.Xml ?? "";
-            await SetStatusAsync("Done.");
+            await SetStatusAsync("Done. XML generated successfully.");
         }
         catch (OperationCanceledException)
         {
-            _error = "Timed out / cancelled.";
+            _error = "Timed out or cancelled (120s limit).";
             await SetStatusAsync("Failed (timeout).");
         }
         catch (Exception ex)
@@ -148,14 +326,80 @@
         await JS.InvokeVoidAsync("downloadTextFile", $"{baseName}.xml", _xml, "application/xml");
     }
 
+    private async Task CopyXmlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_xml)) return;
+        await JS.InvokeVoidAsync("copyTextToClipboard", _xml);
+        _status = "XML copied to clipboard.";
+    }
+
     private async Task OpenFilePicker()
-        => await JS.InvokeVoidAsync("clickById", "filePicker");
+    {
+        if (_busy) return;
+        await JS.InvokeVoidAsync("clickById", "filePicker");
+    }
 
     private void OnInputFileChanged(InputFileChangeEventArgs e)
     {
         _file = e.File;
         _xml = "";
         _error = "";
-        _status = "File selected. Ready to convert.";
+
+        _status = (_file is not null && !IsFileAllowed(_file.Name, _accept))
+            ? "File selected, but it doesn’t match the current filter. Change the filter or select another file."
+            : "File selected. Ready to convert.";
+    }
+
+    private void ClearFile()
+    {
+        _file = null;
+        _xml = "";
+        _error = "";
+        _status = "File cleared.";
+    }
+
+    private void ClearXml()
+    {
+        _xml = "";
+        _error = "";
+        _status = "Preview cleared.";
+    }
+
+    private void ResetAll()
+    {
+        _file = null;
+        _xml = "";
+        _error = "";
+        _status = "";
+        _inputKind = InputKind.Auto;
+        _accept = ".csv,.xlsx";
+    }
+
+    // Drag & drop helpers
+    private void OnDragEnter(DragEventArgs e)
+    {
+        if (_busy) return;
+        _dragOver = true;
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+        if (_busy) return;
+        _dragOver = true;
+        // PreventDefault is done via @ondragover:preventDefault="true"
+    }
+
+    private void OnDragLeave(DragEventArgs e)
+    {
+        _dragOver = false;
+    }
+
+    private async Task OnDrop(DragEventArgs e)
+    {
+        _dragOver = false;
+        // PreventDefault is done via @ondrop:preventDefault="true"
+
+        _status = "Drop detected. Please click the area to choose the file (browser security restriction).";
+        await InvokeAsync(StateHasChanged);
     }
 }
