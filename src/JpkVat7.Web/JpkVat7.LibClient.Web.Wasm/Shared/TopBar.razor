@@ -1,0 +1,87 @@
+@implements IDisposable
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using JpkVat7.LibClient.Web.Wasm.Services.TopBar
+@using JpkVat7.LibClient.Web.Wasm.Services.Language
+@inject ITopBarService TopBarService
+@inject ILanguageService Lang
+@inject IStringLocalizer<JpkVat7.LibClient.Web.Wasm.Layout.MainLayout> L
+@inject IJSRuntime JS
+
+<MudAppBar Elevation="1"
+           Dense="true"
+           Fixed="true"
+           Color="Color.Default"
+           Class="jpk-appbar">
+
+    <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                   Color="Color.Inherit"
+                   Edge="Edge.Start"
+                   Disabled="@(!ShowMenuButton)"
+                   OnClick="ToggleDrawerClicked"
+                   Class="jpk-appbar-menu" />
+
+    <div class="jpk-appbar-title">
+        <MudText Typo="Typo.h6" Class="fw-700 jpk-ellipsis">@TopBarService.State.Title</MudText>
+
+        @if (!string.IsNullOrWhiteSpace(TopBarService.State.Subtitle))
+        {
+            <MudText Typo="Typo.caption" Class="opacity-80 jpk-ellipsis">@TopBarService.State.Subtitle</MudText>
+        }
+    </div>
+
+    <MudSpacer />
+
+    <MudSelect T="string"
+               Dense="true"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               Value="@Lang.CurrentCulture"
+               ValueChanged="OnCultureChanged"
+               Class="jpk-lang-select"
+               AnchorOrigin="Origin.BottomRight"
+               TransformOrigin="Origin.TopRight">
+
+        <!-- ✅ use @("...") so Razor treats it as a string -->
+        <MudSelectItem Value="@("en")">@L["LangEnglish"]</MudSelectItem>
+        <MudSelectItem Value="@("pl")">@L["LangPolish"]</MudSelectItem>
+
+    </MudSelect>
+
+</MudAppBar>
+
+@code {
+    [Parameter] public bool ShowMenuButton { get; set; } = true;
+    [Parameter] public EventCallback OnToggleDrawer { get; set; }
+
+    protected override void OnInitialized()
+    {
+        TopBarService.OnChanged += OnAnyChanged;
+        Lang.OnChanged += OnAnyChanged;
+    }
+
+    private void OnAnyChanged()
+        => InvokeAsync(StateHasChanged);
+
+    private async Task ToggleDrawerClicked()
+    {
+        if (!ShowMenuButton) return;
+
+        if (OnToggleDrawer.HasDelegate)
+            await OnToggleDrawer.InvokeAsync();
+    }
+
+    private async Task OnCultureChanged(string culture)
+    {
+        await Lang.SetCultureAsync(culture);
+
+        // ✅ reload so all localized resources refresh
+        await JS.InvokeVoidAsync("appCulture.set", culture);
+    }
+
+    public void Dispose()
+    {
+        TopBarService.OnChanged -= OnAnyChanged;
+        Lang.OnChanged -= OnAnyChanged;
+    }
+}

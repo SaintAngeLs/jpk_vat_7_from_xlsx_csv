@@ -1,0 +1,70 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using JpkVat7.LibClient.Web.Wasm.Services.TopBar
+@using JpkVat7.LibClient.Web.Wasm.Services.Language
+
+@inject ITopBarService TopBarService
+@inject ILanguageService Lang
+@inject IStringLocalizer<JpkVat7.LibClient.Web.Wasm.Layout.MainLayout> L
+
+<MudLayout Class="jpk-layout">
+
+    <TopBar ShowMenuButton="true" OnToggleDrawer="ToggleDrawer" />
+
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Elevation="1"
+               Class="jpk-drawer"
+               ClipMode="DrawerClipMode.Always"
+               Fixed="true">
+
+        <MudDrawerHeader Class="jpk-drawer-header">
+            <MudText Typo="Typo.subtitle1" Class="fw-700">@L["AppTitle"]</MudText>
+            <MudText Typo="Typo.caption" Class="opacity-70">@L["AppSubtitle"]</MudText>
+        </MudDrawerHeader>
+
+        <MudNavMenu>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+                @L["NavHome"]
+            </MudNavLink>
+
+           
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="jpk-main">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TopBarService.OnChanged += OnAnyChanged;
+        Lang.OnChanged += OnAnyChanged;
+
+        await Lang.InitializeAsync();
+
+        // Optional default title (pages can override)
+        TopBarService.SetTitle(L["AppTitle"].Value, L["AppSubtitle"].Value);
+    }
+
+    private void OnAnyChanged()
+        => InvokeAsync(StateHasChanged);
+
+    private void ToggleDrawer()
+        => _drawerOpen = !_drawerOpen;
+
+    public void Dispose()
+    {
+        TopBarService.OnChanged -= OnAnyChanged;
+        Lang.OnChanged -= OnAnyChanged;
+    }
+}

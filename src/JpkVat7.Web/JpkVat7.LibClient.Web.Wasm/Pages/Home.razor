@@ -1,0 +1,399 @@
+﻿@page "/"
+@implements IDisposable
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Localization
+@inject JpkVat7.LibClient.Web.Wasm.Services.JpkGrpcUploadClient GrpcClient
+@inject JpkVat7.LibClient.Web.Wasm.Services.TopBar.ITopBarService TopBar
+@inject JpkVat7.LibClient.Web.Wasm.Services.Language.ILanguageService Lang
+@inject IStringLocalizer<Home> L
+
+@inject IJSRuntime JS
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6 mb-10">
+    <MudPaper Class="pa-6 jpk-card" Elevation="2" Rounded="Rounded.Xl">
+
+        <MudStack Spacing="1">
+            <MudText Typo="Typo.h4" Class="fw-700">@L["Title"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                @((MarkupString)L["Subtitle"].Value)
+            </MudText>
+        </MudStack>
+
+        <MudDivider Class="my-4" />
+
+        <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Dense="true" Class="mb-4">
+            @L["Info"]
+        </MudAlert>
+
+        @if (!string.IsNullOrWhiteSpace(_status))
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                @_status
+            </MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4" Style="white-space:pre-wrap">
+                @_error
+            </MudAlert>
+        }
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="5">
+                <MudPaper Class="pa-4" Elevation="0" Outlined="true" Rounded="Rounded.Lg">
+
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["Step1"]</MudText>
+
+                    <MudSelect T="InputKind"
+                               Dense="true"
+                               Variant="Variant.Outlined"
+                               Label="@L["InputFormat"]"
+                               Value="_inputKind"
+                               ValueChanged="OnInputKindChanged"
+                               Class="mb-3">
+                        <MudSelectItem Value="InputKind.Auto">@L["AutoDetect"]</MudSelectItem>
+                        <MudSelectItem Value="InputKind.Csv">@L["Csv"]</MudSelectItem>
+                        <MudSelectItem Value="InputKind.Xlsx">@L["Xlsx"]</MudSelectItem>
+                    </MudSelect>
+
+                    <MudText Typo="Typo.h6" Class="mt-2 mb-2">@L["Step2"]</MudText>
+
+                    <div class="dropzone @( _busy ? "dropzone-disabled" : "" )"
+                         @ondragenter="OnDragEnter"
+                         @ondragover="OnDragOver"
+                         @ondragover:preventDefault="true"
+                         @ondragleave="OnDragLeave"
+                         @ondrop="OnDrop"
+                         @ondrop:preventDefault="true"
+                         role="button"
+                         tabindex="0"
+                         aria-label="File drop area"
+                         @onclick="OpenFilePicker">
+                        <MudStack Spacing="1" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" />
+                            <MudText Typo="Typo.body1" Class="fw-600">@L["DropTitle"]</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@L["DropOr"]</MudText>
+
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small">
+                                @L["Allowed"]: @_accept
+                            </MudChip>
+                        </MudStack>
+                    </div>
+
+                    <InputFile id="filePicker"
+                               OnChange="OnInputFileChanged"
+                               accept="@_accept"
+                               style="display:none" />
+
+                    @if (_file is not null)
+                    {
+                        <MudPaper Class="pa-3 mt-3" Outlined="true" Rounded="Rounded.Lg">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Description" />
+                                <MudStack Spacing="0" Class="flex-grow-1">
+                                    <MudText Typo="Typo.subtitle2" Class="fw-700">@_file.Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @($"{_file.Size / 1024.0:F1} KB")
+                                    </MudText>
+                                </MudStack>
+
+                                <MudTooltip Text="@L["RemoveFile"]">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                   Color="Color.Default"
+                                                   OnClick="ClearFile"
+                                                   Disabled="@_busy" />
+                                </MudTooltip>
+                            </MudStack>
+                        </MudPaper>
+                    }
+
+                    <MudDivider Class="my-4" />
+
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["Step3"]</MudText>
+
+                    <MudStack Spacing="2">
+                        <MudButton StartIcon="@Icons.Material.Filled.Autorenew"
+                                   Disabled="@(!CanConvert)"
+                                   OnClick="ConvertAsync"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true">
+                            @(_busy ? L["Converting"].Value : L["Convert"].Value)
+                        </MudButton>
+
+                        <MudButton StartIcon="@Icons.Material.Filled.Download"
+                                   Disabled="@(!CanDownload)"
+                                   OnClick="DownloadXmlAsync"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Secondary"
+                                   FullWidth="true">
+                            @L["Download"]
+                        </MudButton>
+
+                        <MudButton StartIcon="@Icons.Material.Filled.Refresh"
+                                   Disabled="@_busy"
+                                   OnClick="ResetAll"
+                                   Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   FullWidth="true">
+                            @L["Reset"]
+                        </MudButton>
+                    </MudStack>
+
+                    @if (_busy)
+                    {
+                        <MudProgressLinear Indeterminate="true" Class="mt-4" />
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                            @L["KeepOpen"]
+                        </MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="7">
+                <MudPaper Class="pa-4" Elevation="0" Outlined="true" Rounded="Rounded.Lg">
+                    <MudStack Direction="Row" AlignItems="AlignItems.Center" JustifyContent="SpaceBetween">
+                        <MudText Typo="Typo.h6">@L["Step4"]</MudText>
+
+                        <MudStack Direction="Row" Spacing="1" AlignItems="AlignItems.Center">
+                            <MudTooltip Text="@L["TooltipCopy"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                               Disabled="@(!CanCopy)"
+                                               OnClick="CopyXmlAsync" />
+                            </MudTooltip>
+                            <MudTooltip Text="@L["TooltipClear"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                               Disabled="@(!CanClearPreview)"
+                                               OnClick="ClearXml" />
+                            </MudTooltip>
+                        </MudStack>
+                    </MudStack>
+
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                        @((MarkupString)L["PreviewHint"].Value)
+                    </MudText>
+
+                    <MudTextField Lines="20"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined"
+                                  Value="@_xml"
+                                  FullWidth="true"
+                                  Class="xml-preview" />
+
+                    @if (string.IsNullOrWhiteSpace(_xml))
+                    {
+                        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3">
+                            @L["NoXml"]
+                        </MudAlert>
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <MudOverlay Visible="_busy" DarkBackground="true" AutoClose="false">
+            <MudPaper Class="pa-6" Rounded="Rounded.Xl">
+                <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                    <MudText Typo="Typo.h6">@L["BusyTitle"]</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                        @L["BusyHint"]
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        </MudOverlay>
+
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private IBrowserFile? _file;
+    private bool _busy;
+    private string _xml = "";
+    private string _error = "";
+    private string _status = "";
+
+    private InputKind _inputKind = InputKind.Auto;
+    private string _accept = ".csv,.xlsx";
+
+    private enum InputKind { Auto, Csv, Xlsx }
+
+    private bool CanConvert => _file is not null && !_busy;
+    private bool CanDownload => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+    private bool CanCopy => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+    private bool CanClearPreview => !string.IsNullOrWhiteSpace(_xml) && !_busy;
+
+    protected override void OnInitialized()
+    {
+        Lang.OnChanged += OnLanguageChanged;
+        SetTopBarTitle();
+    }
+
+    private void OnLanguageChanged()
+    {
+        SetTopBarTitle();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetTopBarTitle()
+    {
+        TopBar.SetTitle(L["Title"].Value, "CSV/XLSX → XML (gRPC-Web)");
+    }
+
+    public void Dispose()
+    {
+        Lang.OnChanged -= OnLanguageChanged;
+    }
+
+    private Task OnInputKindChanged(InputKind kind)
+    {
+        _inputKind = kind;
+        _accept = kind switch
+        {
+            InputKind.Csv => ".csv",
+            InputKind.Xlsx => ".xlsx",
+            _ => ".csv,.xlsx"
+        };
+
+        if (_file is not null && !IsFileAllowed(_file.Name, _accept))
+            _status = L["StatusFileMismatch"].Value;
+
+        return Task.CompletedTask;
+    }
+
+    private static bool IsFileAllowed(string fileName, string accept)
+    {
+        var lower = fileName.ToLowerInvariant();
+        var allowed = accept.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var ext in allowed)
+            if (lower.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+        return false;
+    }
+
+    private async Task SetStatusAsync(string text)
+    {
+        _status = text;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+    }
+
+    private async Task ConvertAsync()
+    {
+        if (_file is null) return;
+
+        _busy = true;
+        _error = "";
+        _xml = "";
+
+        await SetStatusAsync(L["StatusStarting"].Value);
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            var reply = await GrpcClient.UploadAndConvertAsync(_file, cts.Token, SetStatusAsync);
+
+            if (!reply.Success)
+            {
+                _error = string.IsNullOrWhiteSpace(reply.ErrorMessage)
+                    ? L["ErrorConversionFailed"].Value
+                    : reply.ErrorMessage;
+
+                if (!string.IsNullOrWhiteSpace(reply.ValidationMessage))
+                    _error += "\n" + reply.ValidationMessage;
+
+                await SetStatusAsync(L["StatusFailed"].Value);
+                return;
+            }
+
+            _xml = reply.Xml ?? "";
+            await SetStatusAsync(L["StatusDone"].Value);
+        }
+        catch (OperationCanceledException)
+        {
+            _error = L["ErrorTimeout"].Value;
+            await SetStatusAsync(L["StatusFailedTimeout"].Value);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            await SetStatusAsync(L["StatusFailedException"].Value);
+        }
+        finally
+        {
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task DownloadXmlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_xml)) return;
+
+        var baseName = (_file?.Name ?? "jpk")
+            .Replace(".xlsx", "", StringComparison.OrdinalIgnoreCase)
+            .Replace(".csv", "", StringComparison.OrdinalIgnoreCase);
+
+        await JS.InvokeVoidAsync("downloadTextFile", $"{baseName}.xml", _xml, "application/xml");
+    }
+
+    private async Task CopyXmlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_xml)) return;
+        await JS.InvokeVoidAsync("copyTextToClipboard", _xml);
+        _status = L["TooltipCopy"].Value;
+    }
+
+    private async Task OpenFilePicker()
+    {
+        if (_busy) return;
+        await JS.InvokeVoidAsync("clickById", "filePicker");
+    }
+
+    private void OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        _file = e.File;
+        _xml = "";
+        _error = "";
+
+        _status = (_file is not null && !IsFileAllowed(_file.Name, _accept))
+            ? L["StatusFileMismatch"].Value
+            : L["StatusFileSelected"].Value;
+    }
+
+    private void ClearFile()
+    {
+        _file = null;
+        _xml = "";
+        _error = "";
+        _status = "";
+    }
+
+    private void ClearXml()
+    {
+        _xml = "";
+        _error = "";
+        _status = "";
+    }
+
+    private void ResetAll()
+    {
+        _file = null;
+        _xml = "";
+        _error = "";
+        _status = "";
+        _inputKind = InputKind.Auto;
+        _accept = ".csv,.xlsx";
+    }
+
+    private void OnDragEnter(DragEventArgs e) { }
+    private void OnDragOver(DragEventArgs e) { }
+    private void OnDragLeave(DragEventArgs e) { }
+
+    private async Task OnDrop(DragEventArgs e)
+    {
+        _status = L["StatusDrop"].Value;
+        await InvokeAsync(StateHasChanged);
+    }
+}

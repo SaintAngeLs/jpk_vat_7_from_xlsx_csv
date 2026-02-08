@@ -1,0 +1,6 @@
+@JpkVat7.Api_HostAddress = http://localhost:5225
+
+GET {{JpkVat7.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

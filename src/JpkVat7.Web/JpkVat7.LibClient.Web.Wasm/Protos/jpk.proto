@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package jpkvat7.v1;
+
+option csharp_namespace = "JpkVat7.Grpc";
+
+service JpkService {
+  rpc GenerateFromFile (stream UploadChunk) returns (GenerateReply);
+}
+
+message UploadChunk {
+  // Send in the first message only (recommended)
+  string file_name = 1;
+
+  // File bytes (present on every chunk)
+  bytes data = 2;
+}
+
+message GenerateReply {
+  bool success = 1;
+  string xml = 2;
+
+  string error_code = 3;
+  string error_message = 4;
+
+  string validation_message = 5;
+}

@@ -1,0 +1,88 @@
+/* ===== App layout ===== */
+
+.jpk-layout {
+  min-height: 100vh;
+}
+
+/* AppBar is fixed -> content must start below it */
+.jpk-main {
+  padding-top: 56px; /* Dense MudAppBar is ~56px */
+  min-height: 100vh;
+}
+
+/* ===== AppBar polish ===== */
+
+.jpk-appbar {
+  width: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1300;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Force a consistent toolbar height + clean padding */
+.jpk-appbar .mud-toolbar {
+  min-height: 56px !important;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Kill default typography margins inside the appbar (THIS is the main fix) */
+.jpk-appbar .mud-typography {
+  margin: 0 !important;
+}
+
+/* Menu button spacing */
+.jpk-appbar-menu {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+/* Title block: compact, centered, no weird stretching */
+.jpk-appbar-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  max-width: 60%;
+}
+
+/* Title/subtitle tighter line-height */
+.jpk-appbar-title .mud-typography-h6,
+.jpk-appbar-title .mud-typography-caption {
+  line-height: 1.1;
+}
+
+/* Ellipsis utility */
+.jpk-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Make the language select match appbar height and align nicely */
+.jpk-lang-select {
+  min-width: 160px;
+}
+
+.jpk-lang-select .mud-input-control {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.jpk-lang-select .mud-input-root {
+  height: 36px;
+}
+
+.jpk-lang-select .mud-input-adornment {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Optional: reduce outlined select padding a bit */
+.jpk-lang-select .mud-input-slot {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
