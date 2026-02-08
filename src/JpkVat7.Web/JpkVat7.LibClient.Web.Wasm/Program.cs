@@ -2,9 +2,15 @@ using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
 using MudBlazor.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Localization;
+using Blazored.LocalStorage;
+
 using JpkVat7.LibClient.Web.Wasm;
 using JpkVat7.LibClient.Web.Wasm.Services;
-using JpkVat7.Grpc; // generated from your WASM proto
+using JpkVat7.LibClient.Web.Wasm.Services.LocalStorage;
+using JpkVat7.LibClient.Web.Wasm.Services.Preferences;
+using JpkVat7.LibClient.Web.Wasm.Services.Language;
+using JpkVat7.Grpc;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -13,28 +19,25 @@ builder.RootComponents.Add<App>("#app");
 // MudBlazor
 builder.Services.AddMudServices();
 
-// ----------------------------
-// gRPC-Web client configuration
-// ----------------------------
+// Localization
+builder.Services.AddLocalization();
 
-// Set this to where your API is running.
-// If API is same origin as WASM host, you can use builder.HostEnvironment.BaseAddress.
-// If API is different (typical), set it in wwwroot/appsettings.json as "ApiBaseUrl".
+// LocalStorage
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<ILocalStorageServiceWrapper, LocalStorageServiceWrapper>();
+builder.Services.AddScoped<IAppPreferencesService, AppPreferencesService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
+
+// gRPC-Web
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
 
 builder.Services.AddSingleton(sp =>
 {
     var handler = new GrpcWebHandler(GrpcWebMode.GrpcWebText, new HttpClientHandler());
-
-    var channel = GrpcChannel.ForAddress(apiBaseUrl, new GrpcChannelOptions
-    {
-        HttpHandler = handler
-    });
-
+    var channel = GrpcChannel.ForAddress(apiBaseUrl, new GrpcChannelOptions { HttpHandler = handler });
     return new JpkService.JpkServiceClient(channel);
 });
 
-// Your upload wrapper service used by the Razor page
 builder.Services.AddSingleton<JpkGrpcUploadClient>();
 
 await builder.Build().RunAsync();

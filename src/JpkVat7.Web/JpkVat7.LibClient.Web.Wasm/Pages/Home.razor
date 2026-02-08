@@ -16,7 +16,6 @@
 
         <MudDivider Class="my-4" />
 
-        <!-- Info -->
         <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Dense="true" Class="mb-4">
             Conversion happens on the server, so your browser stays responsive. Large files may take a moment.
         </MudAlert>
@@ -227,7 +226,6 @@
 
     private enum InputKind { Auto, Csv, Xlsx }
 
-    // FIX 2: avoid complex expressions inside Disabled on some components / Razor analyzers
     private bool CanConvert => _file is not null && !_busy;
     private bool CanDownload => !string.IsNullOrWhiteSpace(_xml) && !_busy;
     private bool CanCopy => !string.IsNullOrWhiteSpace(_xml) && !_busy;
