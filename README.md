@@ -1,182 +1,202 @@
+<h1>🇵🇱 JPK VAT-7 Generator (Excel/CSV → JPK_V7 XML)</h1>
 
-# 🇵🇱 JPK VAT-7 Generator from XLSX / CSV (Blazor WASM + gRPC + .NET 9)
+<p>
+This repository contains a working <strong>.NET 9 + gRPC + Blazor WebAssembly</strong> solution that generates official Polish
+<strong>JPK_V7M / JPK_V7K VAT XML</strong> files from structured <strong>Excel (.xlsx)</strong> or <strong>CSV</strong> input files.
+</p>
 
-**jpk_vat_7_from_xlsx_csv** is a modern **.NET 9** solution for generating official Polish **JPK_V7M / JPK_V7K VAT XML files** directly from structured **Excel (.xlsx)** or **CSV** input.
-
-This project provides:
-
-✅ gRPC-based backend API  
-✅ Blazor WebAssembly frontend client  
-✅ Automatic mapping of VAT sections  
-✅ XML generation + XSD validation  
-✅ Ready-to-use sample Excel template  
-✅ Clean modular architecture (Core / Input / Xml / Api / Web)
+<p>
+Goal:
+Upload VAT data in an Excel/CSV template → generate a valid JPK XML file → download it.
+</p>
 
 ---
 
-## 🚀 Why This Project?
+<h2>✅ What This Project Does</h2>
 
-Generating **JPK VAT-7 (JPK_V7)** files is required for every VAT-registered business in Poland.
+<p>
+This app automates the creation of <strong>JPK VAT-7 (JPK_V7)</strong> files required for Polish VAT reporting.
+</p>
 
-Most solutions are expensive, closed-source, or difficult to integrate.
+It includes:
 
-This project is built to be:
+- gRPC backend API for processing input files  
+- Blazor WebAssembly frontend for upload/download  
+- Excel + CSV parsing  
+- Automatic mapping into official JPK sections  
+- XML generation + XSD schema validation  
 
-- **Open-source**
-- **Developer-friendly**
-- **Modern (.NET 9 + gRPC)**
-- **Extensible for accounting systems**
-- **Easy to use with Excel templates**
+---
 
-Perfect for:
+<h2>📌 When Is This Useful?</h2>
 
+<p>
+You can use this project if you are building:
+</p>
+
+- Accounting automation tools  
 - ERP integrations  
-- Accounting automation  
-- VAT reporting tools  
-- Polish tax compliance systems  
+- Internal VAT reporting systems  
+- Polish tax compliance SaaS platforms  
+
+<p>
+Instead of manually filling government tools, you generate XML directly from spreadsheets.
+</p>
 
 ---
 
-## ✨ Key Features
+<h2>✨ Main Features</h2>
 
-### 📥 Input Support
-- Excel `.xlsx` files
-- CSV files
-- Directory-based batch loading
+- Excel (.xlsx) input support  
+- CSV input support  
+- Batch loading from directories  
+- Clean modular architecture  
+- Generates full official XML structure  
+- Built-in XSD validation (MF schema)
 
-### 🧠 Automatic Section Mapping
-The system maps spreadsheet sections into official JPK structures:
+<p><strong>JPK sections covered:</strong></p>
 
-- Naglowek
-- Podmiot
-- Deklaracja
-- SprzedazWiersz / SprzedazCtrl
-- ZakupWiersz / ZakupCtrl
-
-### 📄 XML Generation
-- Generates valid **JPK_V7 XML output**
-- Supports schema-driven structure
-- Modular writer implementation
-
-### ✅ Validation
-- Built-in **XSD validation**
-- Ensures compliance with MF (Ministerstwo Finansów) schema
-
-### 🌐 Web UI (Blazor WASM)
-- User-friendly frontend
-- Runs fully in the browser
-- Upload Excel → Download XML
-
-### ⚡ gRPC API Backend
-- High-performance service layer
-- gRPC-Web enabled for browser support
+- Naglowek  
+- Podmiot  
+- Deklaracja  
+- SprzedazWiersz / SprzedazCtrl  
+- ZakupWiersz / ZakupCtrl  
 
 ---
 
-## 🏗️ Tech Stack
-
-| Layer | Technology |
-|------|------------|
-| Backend API | ASP.NET Core (.NET 9) + gRPC |
-| Frontend | Blazor WebAssembly + MudBlazor |
-| Communication | gRPC-Web |
-| Input Parsing | CSV + XLSX Readers |
-| Output | XML Writer + XSD Validator |
-| Architecture | Clean modular solution |
-
----
-
-## 📂 Project Structure
+<h2>🏗️ Solution Structure</h2>
 
 ```bash
 src/
- ├── JpkVat7.Api        # gRPC API backend
- ├── JpkVat7.Core       # Domain models + mapping + abstractions
- ├── JpkVat7.Input      # XLSX/CSV readers + parsers + loaders
- ├── JpkVat7.Xml        # XML generation + validation
+ ├── JpkVat7.Api        # Backend gRPC API (.NET)
+ ├── JpkVat7.Core       # Domain models + mapping logic
+ ├── JpkVat7.Input      # XLSX/CSV parsing + loaders
+ ├── JpkVat7.Xml        # XML writer + XSD validator
  ├── JpkVat7.Web        # Blazor WebAssembly frontend
 samples-przyklazy-wejscia/
- └── exmpla.xlsx        # Example VAT input template
+ └── example_sectioned.xlsx
 ````
 
 ---
 
-## 📊 Example Input File
+<h2>📂 Example Input Template</h2>
 
-Sample Excel template is included:
+<p>
+A ready-to-use Excel template is included here:
+</p>
 
 ```bash
-samples-przyklazy-wejscia/exmpla.xlsx
+samples-przyklazy-wejscia/example_sectioned.xlsx
 ```
 
-You can fill it with:
+Fill in:
 
+* Company header info
 * VAT sales rows
 * VAT purchase rows
-* Company header data
 
-Then generate valid JPK XML output.
-
----
-
-## ▶️ Running the Project
-
-### 1️⃣ Requirements
-
-* .NET SDK **9.0 Preview / RC**
-* Node.js (optional for frontend tooling)
-* Any IDE (Rider / Visual Studio / VS Code)
+<p>
+Then upload it in the frontend to generate XML.
+</p>
 
 ---
 
-### 2️⃣ Run gRPC API Backend
+<h2>▶️ How to Run the Project (Step-by-Step)</h2>
+
+<h3>1️⃣ Requirements</h3>
+
+* .NET SDK 9.0 Preview/RC
+* Visual Studio / Rider / VS Code
+
+Check:
+
+```bash
+dotnet --version
+```
+
+You should see:
+
+```bash
+9.0.x
+```
+
+---
+
+<h2>🚀 Running Backend + Frontend</h2>
+
+<p>
+The system has two parts:
+</p>
+
+* Backend API → `JpkVat7.Api`
+* Frontend UI → `JpkVat7.Web.Wasm`
+
+<p>
+You need both running.
+</p>
+
+---
+
+<h3>2️⃣ Start the gRPC Backend API</h3>
 
 ```bash
 cd src/JpkVat7.Api
 dotnet run
 ```
 
-API will start on:
+Backend starts on:
 
-```
+```text
 http://localhost:5000
+https://localhost:7000
 ```
 
-Health check:
+<p><strong>Health check:</strong></p>
 
-```bash
-GET /health
+```text
+GET http://localhost:5000/health
 ```
+
+If it returns `"Healthy"` → backend works.
 
 ---
 
-### 3️⃣ Run Blazor WebAssembly Client
+<h3>3️⃣ Start the Blazor WebAssembly Client</h3>
 
 ```bash
 cd src/JpkVat7.Web/JpkVat7.Web.Wasm
 dotnet run
 ```
 
-Frontend runs in browser and connects via gRPC-Web.
+Frontend runs at:
+
+```text
+https://localhost:xxxx
+```
+
+Open it in your browser.
 
 ---
 
-## 🔌 gRPC Service Architecture
+<h2>🔌 How Frontend Connects to Backend</h2>
 
-Backend uses:
+<p>
+Browsers do not support raw gRPC directly, so this project uses <strong>gRPC-Web</strong>.
+</p>
 
-* `Grpc.AspNetCore.Web`
-* `GrpcWebOptions`
-* Browser-enabled gRPC-Web middleware
+Backend enables it in `Program.cs`:
 
 ```csharp
-app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
+app.UseGrpcWeb(new GrpcWebOptions
+{
+    DefaultEnabled = true
+});
 
 app.MapGrpcService<JpkGrpcService>()
    .EnableGrpcWeb();
 ```
 
-Client connects using:
+Frontend connects using:
 
 ```csharp
 var handler = new GrpcWebHandler(
@@ -185,52 +205,52 @@ var handler = new GrpcWebHandler(
 );
 
 var channel = GrpcChannel.ForAddress(apiBaseUrl,
-    new GrpcChannelOptions { HttpHandler = handler });
+    new GrpcChannelOptions
+    {
+        HttpHandler = handler
+    });
 ```
 
 ---
 
-## 📌 Use Cases
+<h2>✅ Typical Workflow</h2>
 
-This solution can be used for:
-
-* Polish VAT automation systems
-* Exporting JPK_V7 for accountants
-* ERP integration with MF XML schema
-* Modern SaaS tax reporting apps
-* Internal compliance tooling
+1. Run backend (`JpkVat7.Api`)
+2. Run frontend (`JpkVat7.Web.Wasm`)
+3. Open browser UI
+4. Upload Excel template
+5. Backend generates JPK XML
+6. Download the final file
 
 ---
 
-## 🤝 Contributing
+<h2>🤝 Contributing</h2>
 
-Contributions are welcome!
-
-If you want to add features or improve schema support:
+Pull requests are welcome.
 
 1. Fork the repo
-2. Create a feature branch
-3. Submit a Pull Request
+2. Create a branch:
 
----
-
-## 📜 License
-
-MIT License — free to use in commercial and open-source projects.
-
----
-
-## 🔍 SEO Keywords (Search Visibility)
-
-JPK VAT-7 generator, JPK_V7M XML export, Polish VAT reporting tool,
-Excel to JPK converter, .NET 9 gRPC VAT system, Blazor WASM tax app,
-Ministerstwo Finansów JPK schema validation, VAT automation Poland
-
----
-
-## ⭐ Support
-
-If this project helps you, consider giving it a ⭐ on GitHub
-and sharing it with other .NET developers working with Polish tax systems.
-
+```bash
+git checkout -b feature/my-change
 ```
+
+3. Commit + push
+4. Open a Pull Request
+
+---
+
+<h2>📜 License</h2>
+
+<p>
+This project is licensed under the <strong>GNU General Public License v3.0</strong>.
+See <a href="./License.md">License.md</a>.
+</p>
+
+---
+
+<h2>⭐ Support</h2>
+
+<p>
+If this repo helped you, consider giving it a ⭐ on GitHub.
+</p>
